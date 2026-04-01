@@ -1,0 +1,50 @@
+# Render Blueprint Specification
+# Use this file to deploy the Hospital Management System on Render.com
+
+services:
+  # ─── DATABASE ──────────────────────────────────────────────
+  - type: database
+    name: hms-db
+    databaseName: hms_database
+    user: hms_admin
+    plan: free
+
+  # ─── BACKEND ───────────────────────────────────────────────
+  - type: web
+    name: hms-api
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npx prisma db push && npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hms-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          name: hms-frontend
+          type: static
+          property: url
+      # Optional: Add CLOUDINARY_URL here if using actual report uploads
+
+  # ─── FRONTEND ──────────────────────────────────────────────
+  - type: static
+    name: hms-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: hms-api
+          type: web
+          property: url
+        suffix: /api

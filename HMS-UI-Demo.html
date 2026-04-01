@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMS — Hospital Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f4f8;
+  --sidebar: #0f2544;
+  --sidebar-hover: #1a3560;
+  --sidebar-active: #1e6bc9;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --text-muted: #718096;
+  --blue: #1e6bc9;
+  --blue-light: #ebf4ff;
+  --green: #0e9f6e;
+  --green-light: #f0fdf4;
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── LOGIN ── */
+.login-wrap { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+.login-left { background: var(--sidebar); display: flex; flex-direction: column; justify-content: center; padding: 60px; color: white; }
+.login-left h1 { font-family: 'DM Serif Display', serif; font-size: 42px; line-height: 1.15; margin-bottom: 16px; }
+.login-left h1 em { color: #60a5fa; font-style: italic; }
+.login-left p { color: #94a3b8; font-size: 16px; line-height: 1.6; max-width: 320px; }
+.login-features { margin-top: 48px; display: flex; flex-direction: column; gap: 16px; }
+.login-feature { display: flex; align-items: center; gap: 12px; color: #cbd5e1; font-size: 14px; }
+.feat-dot { width: 8px; height: 8px; border-radius: 50%; background: #60a5fa; flex-shrink: 0; }
+.login-right { display: flex; align-items: center; justify-content: center; padding: 40px; background: #f8fafc; }
+.login-card { background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--shadow-md); }
+.login-card h2 { font-size: 24px; font-weight: 600; margin-bottom: 6px; }
+.login-card .sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+.role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 28px; }
+.role-tab { padding: 10px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.18s; color: var(--text-muted); }
+.role-tab.active { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+.field input { width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.field input:focus { border-color: var(--blue); }
+.btn-primary { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; margin-top: 4px; }
+.btn-primary:hover { background: #1a5eb5; }
+.login-toggle { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-muted); }
+.login-toggle a { color: var(--blue); cursor: pointer; font-weight: 500; }
+
+/* ── APP SHELL ── */
+.app { display: none; height: 100vh; overflow: hidden; }
+.app.visible { display: grid; grid-template-columns: 240px 1fr; }
+.sidebar { background: var(--sidebar); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-brand { padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.brand-logo { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; color: white; font-size: 17px; }
+.brand-name { color: white; font-weight: 600; font-size: 16px; letter-spacing: 0.01em; }
+.brand-role { color: #94a3b8; font-size: 11px; margin-top: 2px; }
+.sidebar-user { padding: 14px 16px; margin: 10px 12px; background: rgba(255,255,255,0.06); border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+.user-ava { width: 32px; height: 32px; border-radius: 50%; background: #1e6bc9; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.user-name { color: white; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-code { color: #94a3b8; font-size: 11px; }
+.sidebar-nav { flex: 1; padding: 8px 12px; overflow-y: auto; }
+.nav-section { color: #475569; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 8px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: #94a3b8; font-size: 13.5px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+.nav-item:hover { background: var(--sidebar-hover); color: #e2e8f0; }
+.nav-item.active { background: var(--sidebar-active); color: white; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+.sidebar-footer { padding: 12px; border-top: 1px solid rgba(255,255,255,0.07); }
+.logout-btn { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: #94a3b8; font-size: 13.5px; cursor: pointer; transition: all 0.15s; width: 100%; background: none; border: none; font-family: inherit; }
+.logout-btn:hover { background: rgba(220,38,38,0.12); color: #fca5a5; }
+
+/* ── MAIN ── */
+.main { display: flex; flex-direction: column; overflow: hidden; }
+.topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-title { font-size: 17px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.notif-btn { position: relative; width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: background 0.15s; }
+.notif-btn:hover { background: var(--bg); }
+.notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 1.5px solid white; }
+.content { flex: 1; overflow-y: auto; padding: 28px; }
+
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
+.section-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.section-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; }
+.stat-value { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 6px; }
+.stat-change { font-size: 12px; color: var(--green); }
+.stat-icon { font-size: 22px; float: right; margin-top: -32px; }
+
+/* ── CARDS ── */
+.card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.card-title { font-size: 15px; font-weight: 600; }
+.card-action { font-size: 13px; color: var(--blue); cursor: pointer; font-weight: 500; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ── BADGES ── */
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge-green  { background: var(--green-light);  color: var(--green); }
+.badge-amber  { background: var(--amber-light);  color: var(--amber); }
+.badge-red    { background: var(--red-light);    color: var(--red); }
+.badge-blue   { background: var(--blue-light);   color: var(--blue); }
+.badge-purple { background: var(--purple-light); color: var(--purple); }
+.badge-gray   { background: #f1f5f9; color: #64748b; }
+
+/* ── TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); background: #f8fafc; border-bottom: 1px solid var(--border); }
+td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+.avatar-sm { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; color: white; margin-right: 8px; }
+
+/* ── PROFILE ── */
+.profile-hero { display: flex; align-items: center; gap: 24px; margin-bottom: 28px; }
+.profile-ava { width: 80px; height: 80px; border-radius: 50%; background: var(--blue); display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; font-weight: 600; }
+.profile-name { font-size: 24px; font-weight: 600; }
+.profile-sub  { color: var(--text-muted); font-size: 14px; margin-top: 3px; }
+.profile-row  { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.info-item label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 4px; }
+.info-item span  { font-size: 14px; font-weight: 500; }
+
+/* ── APPOINTMENTS ── */
+.appt-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.appt-item:last-child { border-bottom: none; }
+.appt-date-box { width: 48px; height: 52px; border-radius: 10px; background: var(--blue-light); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.appt-day  { font-size: 20px; font-weight: 700; color: var(--blue); line-height: 1; }
+.appt-mon  { font-size: 10px; font-weight: 600; color: var(--blue); text-transform: uppercase; }
+.appt-info { flex: 1; }
+.appt-title { font-size: 14px; font-weight: 600; }
+.appt-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.appt-actions { display: flex; gap: 8px; }
+.btn-sm { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-accept { background: var(--green-light); color: var(--green); }
+.btn-accept:hover { background: #dcfce7; }
+.btn-reject { background: var(--red-light); color: var(--red); }
+.btn-reject:hover { background: #fee2e2; }
+.btn-view { background: var(--blue-light); color: var(--blue); }
+
+/* ── CHAT ── */
+.chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 0; background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; height: calc(100vh - 160px); box-shadow: var(--shadow); }
+.chat-list { border-right: 1px solid var(--border); overflow-y: auto; }
+.chat-list-header { padding: 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); background: #f8fafc; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chat-contact { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.12s; }
+.chat-contact:hover { background: #f8fafc; }
+.chat-contact.active { background: var(--blue-light); }
+.contact-ava { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; color: white; flex-shrink: 0; position: relative; }
+.online-ring { position: absolute; bottom: 0; right: 0; width: 11px; height: 11px; border-radius: 50%; background: var(--green); border: 2px solid white; }
+.contact-info { flex: 1; overflow: hidden; }
+.contact-name { font-size: 13.5px; font-weight: 600; }
+.contact-prev { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.contact-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.unread-badge { background: var(--blue); color: white; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+.chat-window { display: flex; flex-direction: column; }
+.chat-topbar { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: white; }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+.msg-row { display: flex; }
+.msg-row.me { justify-content: flex-end; }
+.bubble { max-width: 65%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.5; }
+.bubble.them { background: white; border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
+.bubble.me { background: var(--blue); color: white; border-radius: 16px 16px 4px 16px; }
+.msg-time { font-size: 10px; margin-top: 4px; color: var(--text-muted); }
+.msg-time.me { color: rgba(255,255,255,0.65); text-align: right; }
+.chat-input-bar { padding: 14px 20px; border-top: 1px solid var(--border); background: white; display: flex; gap: 10px; }
+.chat-input { flex: 1; padding: 10px 16px; border-radius: 24px; border: 1.5px solid var(--border); font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.chat-input:focus { border-color: var(--blue); }
+.chat-send { width: 38px; height: 38px; border-radius: 50%; background: var(--blue); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.chat-send:hover { background: #1a5eb5; }
+
+/* ── REPORT UPLOAD ── */
+.drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.15s; background: #f8fafc; }
+.drop-zone:hover { border-color: var(--blue); background: var(--blue-light); }
+.drop-icon { font-size: 40px; margin-bottom: 12px; }
+.drop-text { font-size: 14px; color: var(--text-muted); }
+.drop-text strong { color: var(--blue); }
+.report-list-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.report-list-item:last-child { border-bottom: none; }
+.file-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--red-light); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.file-name { font-size: 14px; font-weight: 500; }
+.file-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.dl-btn { margin-left: auto; padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--border); background: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.dl-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ── PRESCRIPTION CARD ── */
+.rx-card { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.rx-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.rx-name { font-size: 15px; font-weight: 600; }
+.rx-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 12px; }
+.rx-field label { color: var(--text-muted); display: block; margin-bottom: 2px; }
+.rx-field span  { font-weight: 500; }
+
+/* ── DOCTOR — PATIENT PANEL ── */
+.patient-select-prompt { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: var(--text-muted); }
+.patient-select-prompt .big-icon { font-size: 48px; margin-bottom: 12px; }
+
+/* ── FORM ELEMENTS ── */
+.form-field { margin-bottom: 14px; }
+.form-field label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13.5px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--blue); }
+textarea.form-input { resize: vertical; min-height: 72px; }
+.form-btn { width: 100%; padding: 11px; background: var(--blue); color: white; border: none; border-radius: 9px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 4px; transition: background 0.15s; }
+.form-btn:hover { background: #1a5eb5; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .login-wrap { grid-template-columns: 1fr; }
+  .login-left { display: none; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════════════════ -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-left">
+    <h1>Modern<br><em>Healthcare</em><br>Management</h1>
+    <p>A unified platform connecting patients and doctors for seamless, compassionate care.</p>
+    <div class="login-features">
+      <div class="login-feature"><span class="feat-dot"></span> Real-time doctor–patient chat</div>
+      <div class="login-feature"><span class="feat-dot"></span> Appointment scheduling & tracking</div>
+      <div class="login-feature"><span class="feat-dot"></span> Digital prescriptions & medical records</div>
+      <div class="login-feature"><span class="feat-dot"></span> Secure PDF report storage</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to your HMS account</p>
+      <div class="role-tabs">
+        <button class="role-tab active" onclick="setRole('patient', this)">🧑‍⚕️ Patient</button>
+        <button class="role-tab" onclick="setRole('doctor', this)">👨‍⚕️ Doctor</button>
+      </div>
+      <div class="field">
+        <label id="idLabel">Patient ID / Email</label>
+        <input type="email" id="loginEmail" placeholder="patient@example.com" value="patient@hms.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" value="patient123">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Sign in</button>
+      <p class="login-toggle">New patient? <a onclick="showRegister()">Create account</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP SHELL
+═══════════════════════════════════════════════════════════ -->
+<div class="app" id="appShell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <div class="brand-icon">🏥</div>
+        <div>
+          <div class="brand-name">HMS</div>
+          <div class="brand-role" id="sidebarRole">Patient Portal</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-ava" id="sidebarAva">P</div>
+      <div>
+        <div class="user-name" id="sidebarName">Patient User</div>
+        <div class="user-code" id="sidebarCode">PAT-0001</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- Filled dynamically -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">
+        <span>🚪</span> Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      <div class="topbar-right">
+        <div class="notif-btn" onclick="showPanel('notifications')">
+          🔔<span class="notif-dot"></span>
+        </div>
+        <div class="user-ava" id="topbarAva" style="width:34px;height:34px;font-size:13px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;cursor:pointer">P</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ──────── PATIENT PANELS ──────── -->
+      <!-- Dashboard -->
+      <div class="panel active" id="panel-dashboard">
+        <h2 class="section-title">Good morning, Sarah 👋</h2>
+        <p class="section-sub">Here's what's happening with your health today.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Appointments</div>
+            <div class="stat-value" style="color:var(--blue)">3</div>
+            <div class="stat-change">↑ 1 upcoming</div>
+            <div class="stat-icon">📅</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Prescriptions</div>
+            <div class="stat-value" style="color:var(--green)">5</div>
+            <div class="stat-change">2 active medicines</div>
+            <div class="stat-icon">💊</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Reports</div>
+            <div class="stat-value" style="color:var(--purple)">8</div>
+            <div class="stat-change">Last upload: 3 days ago</div>
+            <div class="stat-icon">📄</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Messages</div>
+            <div class="stat-value" style="color:var(--amber)">2</div>
+            <div class="stat-change">Unread from Dr. Mehta</div>
+            <div class="stat-icon">💬</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Upcoming Appointments</span>
+              <span class="card-action" onclick="showPanel('appointments')">View all</span>
+            </div>
+            <div class="appt-item">
+              <div class="appt-date-box">
+                <div class="appt-day">14</div>
+                <div class="appt-mon">Apr</div>
+              </div>
+              <div class="appt-info">
+                <div class="appt-title">Dr. Ravi Mehta</div>
+                <div class="appt-meta">Cardiology · 10:30 AM</div>
+              </div>
+              <span class="badge badge-green">Accepted</span>
+            </div>
+            <div class="appt-item">
+              <div class="appt-date-box">
+                <div class="appt-day">19</div>
+                <div class="appt-mon">Apr</div>
+              </div>
+              <div class="appt-info">
+                <div class="appt-title">Dr. Priya Sharma</div>
+                <div class="appt-meta">Dermatology · 2:00 PM</div>
+              </div>
+              <span class="badge badge-amber">Pending</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Prescriptions</span>
+              <span class="card-action" onclick="showPanel('records')">View all</span>
+            </div>
+            <div class="rx-card">
+              <div class="rx-header">
+                <span class="rx-name">Metformin 500mg</span>
+                <span class="badge badge-green">Active</span>
+              </div>
+              <div class="rx-row">
+                <div class="rx-field"><label>Dosage</label><span>500mg</span></div>
+                <div class="rx-field"><label>Frequency</label><span>Twice daily</span></div>
+                <div class="rx-field"><label>Duration</label><span>30 days</span></div>
+              </div>
+            </div>
+            <div class="rx-card">
+              <div class="rx-header">
+                <span class="rx-name">Atorvastatin 10mg</span>
+                <span class="badge badge-green">Active</span>
+              </div>
+              <div class="rx-row">
+                <div class="rx-field"><label>Dosage</label><span>10mg</span></div>
+                <div class="rx-field"><label>Frequency</label><span>Once daily</span></div>
+                <div class="rx-field"><label>Duration</label><span>90 days</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Medical History</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Symptoms</th><th>Status</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td>12 Mar 2025</td>
+                  <td><span class="avatar-sm" style="background:#1e6bc9">R</span>Dr. Ravi Mehta</td>
+                  <td>Type 2 Diabetes (controlled)</td>
+                  <td>Fatigue, frequent thirst</td>
+                  <td><span class="badge badge-green">Treated</span></td>
+                </tr>
+                <tr>
+                  <td>18 Feb 2025</td>
+                  <td><span class="avatar-sm" style="background:#7c3aed">P</span>Dr. Priya Sharma</td>
+                  <td>Mild hypertension</td>
+                  <td>Headache, dizziness</td>
+                  <td><span class="badge badge-amber">Monitoring</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="panel" id="panel-profile">
+        <div class="card">
+          <div class="profile-hero">
+            <div class="profile-ava">S</div>
+            <div>
+              <div class="profile-name">Sarah Johnson</div>
+              <div class="profile-sub">Patient · PAT-0001</div>
+              <div class="profile-row">
+                <span class="badge badge-blue">Type 2 Diabetes</span>
+                <span class="badge badge-amber">Hypertension</span>
+              </div>
+            </div>
+          </div>
+          <div class="info-grid">
+            <div class="info-item"><label>Age</label><span>42 years</span></div>
+            <div class="info-item"><label>Blood Type</label><span>O+</span></div>
+            <div class="info-item"><label>Weight</label><span>67.5 kg</span></div>
+            <div class="info-item"><label>Height</label><span>163 cm</span></div>
+            <div class="info-item"><label>Phone</label><span>+91 98765 43210</span></div>
+            <div class="info-item"><label>Email</label><span>sarah@example.com</span></div>
+            <div class="info-item"><label>Emergency Contact</label><span>John Johnson (Spouse)</span></div>
+            <div class="info-item"><label>Emergency Phone</label><span>+91 98765 11111</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments -->
+      <div class="panel" id="panel-appointments">
+        <h2 class="section-title">My Appointments</h2>
+        <p class="section-sub">Book, track, and manage your doctor visits.</p>
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Book New Appointment</span>
+              </div>
+              <div class="form-field">
+                <label>Select Doctor</label>
+                <select class="form-input">
+                  <option>Dr. Ravi Mehta — Cardiology</option>
+                  <option>Dr. Priya Sharma — Dermatology</option>
+                  <option>Dr. Arjun Nair — Neurology</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Date & Time</label>
+                <input type="datetime-local" class="form-input">
+              </div>
+              <div class="form-field">
+                <label>Reason for Visit</label>
+                <textarea class="form-input" placeholder="Briefly describe your symptoms or concern..."></textarea>
+              </div>
+              <button class="form-btn" onclick="alert('Appointment request sent! The doctor will confirm shortly.')">
+                Request Appointment
+              </button>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">All Appointments</span></div>
+              <div class="appt-item">
+                <div class="appt-date-box"><div class="appt-day">14</div><div class="appt-mon">Apr</div></div>
+                <div class="appt-info">
+                  <div class="appt-title">Dr. Ravi Mehta</div>
+                  <div class="appt-meta">Cardiology · 10:30 AM · Follow-up</div>
+                </div>
+                <span class="badge badge-green">Accepted</span>
+              </div>
+              <div class="appt-item">
+                <div class="appt-date-box"><div class="appt-day">19</div><div class="appt-mon">Apr</div></div>
+                <div class="appt-info">
+                  <div class="appt-title">Dr. Priya Sharma</div>
+                  <div class="appt-meta">Dermatology · 2:00 PM · New visit</div>
+                </div>
+                <span class="badge badge-amber">Pending</span>
+              </div>
+              <div class="appt-item">
+                <div class="appt-date-box"><div class="appt-day">12</div><div class="appt-mon">Mar</div></div>
+                <div class="appt-info">
+                  <div class="appt-title">Dr. Ravi Mehta</div>
+                  <div class="appt-meta">Cardiology · 11:00 AM · Checkup</div>
+                </div>
+                <span class="badge badge-gray">Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medical Records -->
+      <div class="panel" id="panel-records">
+        <h2 class="section-title">Medical Records & Prescriptions</h2>
+        <p class="section-sub">Your complete health history and current medications.</p>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Diagnosis: 12 March 2025</span><span class="badge badge-green">Treated</span></div>
+          <div class="info-grid" style="margin-bottom:16px">
+            <div class="info-item"><label>Doctor</label><span>Dr. Ravi Mehta</span></div>
+            <div class="info-item"><label>Diagnosis</label><span>Type 2 Diabetes (controlled)</span></div>
+            <div class="info-item"><label>Symptoms</label><span>Fatigue, excessive thirst, frequent urination</span></div>
+            <div class="info-item"><label>Advice</label><span>Low-carb diet, 30 min daily walk, monitor blood sugar</span></div>
+          </div>
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:10px">Prescriptions</div>
+          <div class="rx-card">
+            <div class="rx-header"><span class="rx-name">Metformin</span><span class="badge badge-green">Active</span></div>
+            <div class="rx-row">
+              <div class="rx-field"><label>Dosage</label><span>500mg</span></div>
+              <div class="rx-field"><label>Frequency</label><span>Twice daily</span></div>
+              <div class="rx-field"><label>Duration</label><span>30 days</span></div>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:8px">Take after meals with water.</div>
+          </div>
+          <div class="rx-card">
+            <div class="rx-header"><span class="rx-name">Atorvastatin</span><span class="badge badge-green">Active</span></div>
+            <div class="rx-row">
+              <div class="rx-field"><label>Dosage</label><span>10mg</span></div>
+              <div class="rx-field"><label>Frequency</label><span>Once daily (night)</span></div>
+              <div class="rx-field"><label>Duration</label><span>90 days</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div class="panel" id="panel-reports">
+        <h2 class="section-title">Medical Reports</h2>
+        <p class="section-sub">Upload, view and share your lab results and scans.</p>
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Upload New Report</span></div>
+              <div class="drop-zone" onclick="alert('File picker would open here')">
+                <div class="drop-icon">📎</div>
+                <div class="drop-text"><strong>Click to upload</strong> or drag and drop</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:6px">PDF, JPG, PNG — Max 10MB</div>
+              </div>
+              <div class="form-field" style="margin-top:14px">
+                <label>Report Title</label>
+                <input class="form-input" placeholder="e.g. Blood Sugar Test — March 2025">
+              </div>
+              <div class="form-field">
+                <label>Report Type</label>
+                <select class="form-input">
+                  <option>Lab Result</option><option>X-Ray</option><option>MRI</option>
+                  <option>Scan</option><option>Other</option>
+                </select>
+              </div>
+              <button class="form-btn">Upload Report</button>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">My Reports (8)</span></div>
+              <div class="report-list-item">
+                <div class="file-icon">📄</div>
+                <div><div class="file-name">HbA1c Blood Test</div><div class="file-meta">Lab Result · 28 Mar 2025 · 1.2 MB</div></div>
+                <button class="dl-btn">⬇ View</button>
+              </div>
+              <div class="report-list-item">
+                <div class="file-icon" style="background:var(--blue-light)">🫁</div>
+                <div><div class="file-name">Chest X-Ray</div><div class="file-meta">X-Ray · 12 Feb 2025 · 3.8 MB</div></div>
+                <button class="dl-btn">⬇ View</button>
+              </div>
+              <div class="report-list-item">
+                <div class="file-icon" style="background:var(--purple-light)">🧠</div>
+                <div><div class="file-name">Brain MRI Report</div><div class="file-meta">MRI · 5 Jan 2025 · 8.1 MB</div></div>
+                <button class="dl-btn">⬇ View</button>
+              </div>
+              <div class="report-list-item">
+                <div class="file-icon">📄</div>
+                <div><div class="file-name">Lipid Profile</div><div class="file-meta">Lab Result · 15 Dec 2024 · 0.9 MB</div></div>
+                <button class="dl-btn">⬇ View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="panel" id="panel-chat">
+        <div class="chat-layout">
+          <div class="chat-list">
+            <div class="chat-list-header">Conversations</div>
+            <div class="chat-contact active">
+              <div class="contact-ava" style="background:#1e6bc9">R<span class="online-ring"></span></div>
+              <div class="contact-info">
+                <div class="contact-name">Dr. Ravi Mehta</div>
+                <div class="contact-prev">Follow up on your blood sugar...</div>
+              </div>
+              <div style="text-align:right"><div class="contact-time">10:32 AM</div><span class="unread-badge">2</span></div>
+            </div>
+            <div class="chat-contact">
+              <div class="contact-ava" style="background:#7c3aed">P</div>
+              <div class="contact-info">
+                <div class="contact-name">Dr. Priya Sharma</div>
+                <div class="contact-prev">Please send your latest report</div>
+              </div>
+              <div class="contact-time">Yesterday</div>
+            </div>
+          </div>
+          <div class="chat-window">
+            <div class="chat-topbar">
+              <div class="contact-ava" style="width:36px;height:36px;background:#1e6bc9;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;position:relative">R<span class="online-ring"></span></div>
+              <div><div style="font-size:14px;font-weight:600">Dr. Ravi Mehta</div><div style="font-size:12px;color:var(--green)">● Online</div></div>
+            </div>
+            <div class="chat-msgs" id="chatMsgs">
+              <div class="msg-row">
+                <div><div class="bubble them">Good morning Sarah! How are you feeling today? Any issues with the Metformin?</div><div class="msg-time">10:15 AM</div></div>
+              </div>
+              <div class="msg-row me">
+                <div><div class="bubble me">Good morning Dr. Mehta! I'm feeling much better. The medication seems to be working.</div><div class="msg-time me">10:20 AM</div></div>
+              </div>
+              <div class="msg-row">
+                <div><div class="bubble them">Great to hear! Please make sure to check your blood sugar before breakfast every day and log it.</div><div class="msg-time">10:25 AM</div></div>
+              </div>
+              <div class="msg-row">
+                <div><div class="bubble them">Also, follow up on your latest HbA1c blood test results — have you received them?</div><div class="msg-time">10:32 AM</div></div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <input class="chat-input" id="chatInput" placeholder="Type a message…" onkeydown="sendMsg(event)">
+              <button class="chat-send" onclick="sendMsgClick()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ──────── DOCTOR PANELS ──────── -->
+      <!-- Doctor Dashboard -->
+      <div class="panel" id="panel-doc-dashboard">
+        <h2 class="section-title">Good morning, Dr. Mehta 👋</h2>
+        <p class="section-sub">You have 4 appointments today.</p>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Today's Appointments</div>
+            <div class="stat-value" style="color:var(--blue)">4</div>
+            <div class="stat-change">2 confirmed, 1 pending</div>
+            <div class="stat-icon">📅</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Patients</div>
+            <div class="stat-value" style="color:var(--green)">148</div>
+            <div class="stat-change">+3 this week</div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending Reviews</div>
+            <div class="stat-value" style="color:var(--amber)">6</div>
+            <div class="stat-change">Lab reports awaiting</div>
+            <div class="stat-icon">🔍</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">New Messages</div>
+            <div class="stat-value" style="color:var(--purple)">11</div>
+            <div class="stat-change">From 5 patients</div>
+            <div class="stat-icon">💬</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Today's Schedule</span></div>
+            <div class="appt-item">
+              <div class="appt-date-box"><div class="appt-day" style="font-size:14px">9:00</div><div class="appt-mon">AM</div></div>
+              <div class="appt-info"><div class="appt-title">Sarah Johnson</div><div class="appt-meta">PAT-0001 · Follow-up · Diabetes</div></div>
+              <div class="appt-actions">
+                <button class="btn-sm btn-accept">✓ Start</button>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-date-box"><div class="appt-day" style="font-size:14px">10:30</div><div class="appt-mon">AM</div></div>
+              <div class="appt-info"><div class="appt-title">Raj Patel</div><div class="appt-meta">PAT-0004 · New · Chest pain</div></div>
+              <div class="appt-actions">
+                <button class="btn-sm btn-accept" onclick="acceptAppt(this)">✓ Accept</button>
+                <button class="btn-sm btn-reject" onclick="rejectAppt(this)">✗ Reject</button>
+              </div>
+            </div>
+            <div class="appt-item">
+              <div class="appt-date-box"><div class="appt-day" style="font-size:14px">2:00</div><div class="appt-mon">PM</div></div>
+              <div class="appt-info"><div class="appt-title">Meena Rao</div><div class="appt-meta">PAT-0012 · Follow-up · BP</div></div>
+              <div class="appt-actions">
+                <button class="btn-sm btn-accept" onclick="acceptAppt(this)">✓ Accept</button>
+                <button class="btn-sm btn-reject" onclick="rejectAppt(this)">✗ Reject</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Recent Patients</span><span class="card-action" onclick="showPanel('patients')">View all</span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Patient</th><th>Condition</th><th>Last Visit</th></tr></thead>
+                <tbody>
+                  <tr onclick="showPanel('patients')" style="cursor:pointer">
+                    <td><span class="avatar-sm" style="background:#1e6bc9">S</span>Sarah Johnson</td>
+                    <td>Diabetes</td><td>12 Mar</td>
+                  </tr>
+                  <tr><td><span class="avatar-sm" style="background:#0e9f6e">M</span>Meena Rao</td><td>Hypertension</td><td>8 Mar</td></tr>
+                  <tr><td><span class="avatar-sm" style="background:#d97706">R</span>Raj Patel</td><td>Chest pain</td><td>New</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor — Patients -->
+      <div class="panel" id="panel-patients">
+        <h2 class="section-title">My Patients</h2>
+        <p class="section-sub">Click a patient to view their full profile and add medical records.</p>
+        <div class="grid-2">
+          <div>
+            <div class="card" style="padding:0;overflow:hidden">
+              <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
+                <input class="form-input" placeholder="Search patients..." style="margin:0;height:36px">
+                <select class="form-input" style="width:130px;height:36px">
+                  <option>All</option><option>Cardiology</option><option>Neuro</option>
+                </select>
+              </div>
+              <div>
+                <div class="chat-contact" onclick="selectPatient('Sarah Johnson', 'PAT-0001', 'Diabetes, Hypertension', 42)">
+                  <div class="contact-ava" style="background:#1e6bc9;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:white">S</div>
+                  <div class="contact-info">
+                    <div class="contact-name">Sarah Johnson</div>
+                    <div class="contact-prev">PAT-0001 · Last visit: 12 Mar</div>
+                  </div>
+                  <span class="badge badge-blue">Active</span>
+                </div>
+                <div class="chat-contact" onclick="selectPatient('Meena Rao', 'PAT-0012', 'Hypertension', 55)">
+                  <div class="contact-ava" style="background:#0e9f6e;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:white">M</div>
+                  <div class="contact-info">
+                    <div class="contact-name">Meena Rao</div>
+                    <div class="contact-prev">PAT-0012 · Last visit: 8 Mar</div>
+                  </div>
+                  <span class="badge badge-amber">Monitoring</span>
+                </div>
+                <div class="chat-contact" onclick="selectPatient('Raj Patel', 'PAT-0004', 'Chest pain (new)', 38)">
+                  <div class="contact-ava" style="background:#d97706;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:white">R</div>
+                  <div class="contact-info">
+                    <div class="contact-name">Raj Patel</div>
+                    <div class="contact-prev">PAT-0004 · New patient</div>
+                  </div>
+                  <span class="badge badge-red">New</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="patientDetailPanel">
+            <div class="card" style="height:100%;display:flex;align-items:center;justify-content:center;min-height:300px">
+              <div class="patient-select-prompt">
+                <div class="big-icon">👤</div>
+                <div style="font-size:15px;font-weight:500;margin-bottom:4px">No patient selected</div>
+                <div style="font-size:13px">Click a patient from the list to view their details</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor — Prescribe -->
+      <div class="panel" id="panel-prescribe">
+        <h2 class="section-title">Add Medical Record</h2>
+        <p class="section-sub">Document diagnosis, symptoms, and prescriptions for a patient.</p>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Patient & Appointment</span></div>
+            <div class="form-field">
+              <label>Patient</label>
+              <select class="form-input">
+                <option>Sarah Johnson (PAT-0001)</option>
+                <option>Meena Rao (PAT-0012)</option>
+                <option>Raj Patel (PAT-0004)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Linked Appointment (optional)</label>
+              <select class="form-input">
+                <option>— Select —</option>
+                <option>14 Apr 10:30 AM — Follow-up</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Diagnosis</label>
+              <input class="form-input" placeholder="e.g. Type 2 Diabetes (controlled)">
+            </div>
+            <div class="form-field">
+              <label>Symptoms</label>
+              <textarea class="form-input" placeholder="Observed symptoms..."></textarea>
+            </div>
+            <div class="form-field">
+              <label>Advice</label>
+              <textarea class="form-input" placeholder="Lifestyle changes, follow-up instructions..."></textarea>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Prescriptions</span>
+              <span class="card-action" onclick="addRxRow()">+ Add medicine</span>
+            </div>
+            <div id="rxRows">
+              <div class="rx-card">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                  <input class="form-input" placeholder="Medicine name" style="grid-column:1/-1">
+                  <input class="form-input" placeholder="Dosage (e.g. 500mg)">
+                  <input class="form-input" placeholder="Frequency">
+                  <div style="display:flex;align-items:center;gap:6px;font-size:13px">
+                    <input class="form-input" type="number" value="7" style="width:60px"> days
+                  </div>
+                </div>
+                <input class="form-input" placeholder="Instructions (optional)">
+              </div>
+            </div>
+            <button class="form-btn" onclick="alert('Medical record saved successfully!')">Save Record</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doctor Chat -->
+      <div class="panel" id="panel-doc-chat">
+        <div class="chat-layout">
+          <div class="chat-list">
+            <div class="chat-list-header">Patient Messages</div>
+            <div class="chat-contact active">
+              <div class="contact-ava" style="background:#1e6bc9;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:white;position:relative">S<span class="online-ring"></span></div>
+              <div class="contact-info">
+                <div class="contact-name">Sarah Johnson</div>
+                <div class="contact-prev">I'm feeling much better...</div>
+              </div>
+              <div style="text-align:right"><div class="contact-time">10:20 AM</div></div>
+            </div>
+            <div class="chat-contact">
+              <div class="contact-ava" style="background:#0e9f6e;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:white">M</div>
+              <div class="contact-info">
+                <div class="contact-name">Meena Rao</div>
+                <div class="contact-prev">Doctor, my BP is 140/90 today</div>
+              </div>
+              <div style="text-align:right"><div class="contact-time">9:45 AM</div><span class="unread-badge">1</span></div>
+            </div>
+          </div>
+          <div class="chat-window">
+            <div class="chat-topbar">
+              <div style="width:36px;height:36px;background:#1e6bc9;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;position:relative">S<span class="online-ring"></span></div>
+              <div><div style="font-size:14px;font-weight:600">Sarah Johnson</div><div style="font-size:12px;color:var(--text-muted)">PAT-0001 · Diabetes, Hypertension</div></div>
+            </div>
+            <div class="chat-msgs">
+              <div class="msg-row">
+                <div><div class="bubble them">Good morning Dr. Mehta! I'm feeling much better. The medication seems to be working.</div><div class="msg-time">10:20 AM</div></div>
+              </div>
+              <div class="msg-row me">
+                <div><div class="bubble me">Great to hear! Please make sure to check your blood sugar before breakfast every day and log it.</div><div class="msg-time me">10:25 AM</div></div>
+              </div>
+              <div class="msg-row me">
+                <div><div class="bubble me">Also, follow up on your latest HbA1c blood test results — have you received them?</div><div class="msg-time me">10:32 AM</div></div>
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <input class="chat-input" id="docChatInput" placeholder="Type a message…" onkeydown="sendDocMsg(event)">
+              <button class="chat-send" onclick="sendDocMsgClick()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="panel" id="panel-notifications">
+        <h2 class="section-title">Notifications</h2>
+        <p class="section-sub">Recent alerts and updates.</p>
+        <div class="card">
+          <div class="appt-item">
+            <div style="font-size:24px">✅</div>
+            <div class="appt-info">
+              <div class="appt-title">Appointment Accepted</div>
+              <div class="appt-meta">Dr. Ravi Mehta confirmed your appointment for 14 Apr, 10:30 AM</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-muted)">2h ago</span>
+          </div>
+          <div class="appt-item">
+            <div style="font-size:24px">💊</div>
+            <div class="appt-info">
+              <div class="appt-title">New Prescription Added</div>
+              <div class="appt-meta">Dr. Mehta added Atorvastatin 10mg to your prescriptions</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-muted)">Yesterday</span>
+          </div>
+          <div class="appt-item">
+            <div style="font-size:24px">💬</div>
+            <div class="appt-info">
+              <div class="appt-title">New Message</div>
+              <div class="appt-meta">Dr. Mehta sent you a message about your blood sugar readings</div>
+            </div>
+            <span style="font-size:12px;color:var(--text-muted)">2 days ago</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────
+let currentRole = 'patient';
+
+const patientNav = [
+  { id: 'dashboard',     icon: '🏠', label: 'Dashboard',       section: null },
+  { id: 'profile',       icon: '👤', label: 'My Profile',       section: 'Health' },
+  { id: 'appointments',  icon: '📅', label: 'Appointments',     section: null },
+  { id: 'records',       icon: '📋', label: 'Medical Records',  section: null },
+  { id: 'reports',       icon: '📄', label: 'Reports',          section: null },
+  { id: 'chat',          icon: '💬', label: 'Chat',             section: 'Communication', badge: '2' },
+  { id: 'notifications', icon: '🔔', label: 'Notifications',    section: null, badge: '3' },
+];
+
+const doctorNav = [
+  { id: 'doc-dashboard', icon: '🏠', label: 'Dashboard',        section: null },
+  { id: 'patients',      icon: '👥', label: 'My Patients',      section: 'Clinical' },
+  { id: 'prescribe',     icon: '💊', label: 'Add Record',       section: null },
+  { id: 'doc-chat',      icon: '💬', label: 'Messages',         section: 'Communication', badge: '11' },
+  { id: 'notifications', icon: '🔔', label: 'Notifications',    section: null, badge: '2' },
+];
+
+const panelTitles = {
+  dashboard: 'Dashboard',
+  profile: 'My Profile',
+  appointments: 'Appointments',
+  records: 'Medical Records',
+  reports: 'Reports',
+  chat: 'Chat',
+  'doc-dashboard': 'Dashboard',
+  patients: 'Patient List',
+  prescribe: 'Add Medical Record',
+  'doc-chat': 'Messages',
+  notifications: 'Notifications',
+};
+
+// ─── ROLE SWITCHER ─────────────────────────────────────────
+function setRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('idLabel').textContent =
+    role === 'patient' ? 'Patient ID / Email' : 'Doctor ID / Email';
+  const vals = role === 'patient'
+    ? ['patient@hms.com', 'patient123']
+    : ['doctor@hms.com',  'doctor123'];
+  document.getElementById('loginEmail').value = vals[0];
+  document.getElementById('loginPass').value  = vals[1];
+}
+
+// ─── LOGIN ─────────────────────────────────────────────────
+function doLogin() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('appShell').classList.add('visible');
+  if (currentRole === 'doctor') {
+    setupDoctor();
+  } else {
+    setupPatient();
+  }
+  showPanel(currentRole === 'doctor' ? 'doc-dashboard' : 'dashboard');
+}
+
+function doLogout() {
+  document.getElementById('appShell').classList.remove('visible');
+  document.getElementById('loginPage').style.display = 'grid';
+  currentRole = 'patient';
+}
+
+function showRegister() {
+  alert('Registration form: fill Name, Email, Password, Age, Phone → POST /api/auth/register/patient');
+}
+
+// ─── SETUP SIDEBAR ─────────────────────────────────────────
+function buildNav(items) {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  let lastSection = null;
+  items.forEach(item => {
+    if (item.section && item.section !== lastSection) {
+      const s = document.createElement('div');
+      s.className = 'nav-section';
+      s.textContent = item.section;
+      nav.appendChild(s);
+      lastSection = item.section;
+    }
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.id = 'nav-' + item.id;
+    el.onclick = () => showPanel(item.id);
+    el.innerHTML = `<span class="nav-icon">${item.icon}</span> ${item.label}` +
+      (item.badge ? `<span class="nav-badge">${item.badge}</span>` : '');
+    nav.appendChild(el);
+  });
+}
+
+function setupPatient() {
+  document.getElementById('sidebarRole').textContent = 'Patient Portal';
+  document.getElementById('sidebarName').textContent = 'Sarah Johnson';
+  document.getElementById('sidebarCode').textContent = 'PAT-0001';
+  document.getElementById('sidebarAva').textContent  = 'S';
+  document.getElementById('topbarAva').textContent   = 'S';
+  buildNav(patientNav);
+}
+
+function setupDoctor() {
+  document.getElementById('sidebarRole').textContent = 'Doctor Portal';
+  document.getElementById('sidebarName').textContent = 'Dr. Ravi Mehta';
+  document.getElementById('sidebarCode').textContent = 'DOC-0001 · Cardiology';
+  document.getElementById('sidebarAva').textContent  = 'R';
+  document.getElementById('topbarAva').textContent   = 'R';
+  buildNav(doctorNav);
+}
+
+// ─── PANEL SWITCHING ───────────────────────────────────────
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  const navItem = document.getElementById('nav-' + id);
+  if (navItem) navItem.classList.add('active');
+  document.getElementById('topbarTitle').textContent = panelTitles[id] || 'Dashboard';
+}
+
+// ─── APPOINTMENT ACTIONS ───────────────────────────────────
+function acceptAppt(btn) {
+  const row = btn.closest('.appt-item');
+  const actions = row.querySelector('.appt-actions');
+  actions.innerHTML = '<span class="badge badge-green">Accepted</span>';
+}
+function rejectAppt(btn) {
+  const row = btn.closest('.appt-item');
+  const actions = row.querySelector('.appt-actions');
+  actions.innerHTML = '<span class="badge badge-red">Rejected</span>';
+}
+
+// ─── PATIENT DETAIL PANEL ──────────────────────────────────
+function selectPatient(name, code, conditions, age) {
+  const initial = name.charAt(0);
+  const colors  = ['#1e6bc9','#0e9f6e','#d97706','#7c3aed','#dc2626'];
+  const color   = colors[code.charCodeAt(code.length-1) % colors.length];
+  document.querySelectorAll('.chat-contact').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('patientDetailPanel').innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div style="width:56px;height:56px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:white">${initial}</div>
+        <div>
+          <div style="font-size:18px;font-weight:600">${name}</div>
+          <div style="font-size:13px;color:var(--text-muted)">${code} · Age: ${age}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${conditions.split(', ').map(c=>`<span class="badge badge-blue">${c}</span>`).join('')}</div>
+        </div>
+      </div>
+      <div class="info-grid" style="margin-bottom:16px">
+        <div class="info-item"><label>Blood Type</label><span>O+</span></div>
+        <div class="info-item"><label>Weight</label><span>67 kg</span></div>
+        <div class="info-item"><label>Last Visit</label><span>12 Mar 2025</span></div>
+        <div class="info-item"><label>Status</label><span class="badge badge-green">Active</span></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:10px">Latest Reports</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:18px">📄</div>
+          <div style="font-size:13px;flex:1">HbA1c Blood Test <span style="color:var(--text-muted);font-size:12px">· 28 Mar 2025</span></div>
+          <button class="dl-btn">View PDF</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+          <div style="font-size:18px">🫁</div>
+          <div style="font-size:13px;flex:1">Chest X-Ray <span style="color:var(--text-muted);font-size:12px">· 12 Feb 2025</span></div>
+          <button class="dl-btn">View PDF</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="form-btn" onclick="showPanel('prescribe')" style="margin:0">+ Add Record</button>
+        <button style="flex:1;padding:11px;background:var(--blue-light);color:var(--blue);border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer" onclick="showPanel('doc-chat')">💬 Chat</button>
+      </div>
+    </div>`;
+}
+
+// ─── ADD RX ROW ────────────────────────────────────────────
+function addRxRow() {
+  const container = document.getElementById('rxRows');
+  const div = document.createElement('div');
+  div.className = 'rx-card';
+  div.style.marginTop = '10px';
+  div.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <input class="form-input" placeholder="Medicine name" style="grid-column:1/-1">
+      <input class="form-input" placeholder="Dosage (e.g. 500mg)">
+      <input class="form-input" placeholder="Frequency">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px">
+        <input class="form-input" type="number" value="7" style="width:60px"> days
+      </div>
+      <button onclick="this.closest('.rx-card').remove()" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:12px;text-align:right">✕ Remove</button>
+    </div>
+    <input class="form-input" placeholder="Instructions (optional)">`;
+  container.appendChild(div);
+}
+
+// ─── CHAT ──────────────────────────────────────────────────
+function sendMsg(e) { if (e.key === 'Enter') sendMsgClick(); }
+function sendMsgClick() {
+  const input = document.getElementById('chatInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chatMsgs');
+  const row  = document.createElement('div');
+  row.className = 'msg-row me';
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  row.innerHTML = `<div><div class="bubble me">${text}</div><div class="msg-time me">${now}</div></div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+  setTimeout(() => {
+    const reply = document.createElement('div');
+    reply.className = 'msg-row';
+    reply.innerHTML = `<div><div class="bubble them">Thank you for the update. I'll review your details and get back to you shortly.</div><div class="msg-time">${now}</div></div>`;
+    msgs.appendChild(reply);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1500);
+}
+
+function sendDocMsg(e) { if (e.key === 'Enter') sendDocMsgClick(); }
+function sendDocMsgClick() {
+  const input = document.getElementById('docChatInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  const msgs = document.querySelector('#panel-doc-chat .chat-msgs');
+  const row  = document.createElement('div');
+  row.className = 'msg-row me';
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  row.innerHTML = `<div><div class="bubble me">${text}</div><div class="msg-time me">${now}</div></div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+}
+</script>
+</body>
+</html>
