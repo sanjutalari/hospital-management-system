@@ -189,16 +189,14 @@ npm install
 **Backend (.env file):**
 ```bash
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/hms_db"
-# For development: DATABASE_URL="file:./dev.db"
+# For development: DATABASE_URL="file:./dev.db"  (SQLite)
+# For production:  DATABASE_URL="postgresql://user:password@localhost:5432/hms_db"
 
 # JWT
 JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRE=15m
-JWT_REFRESH_EXPIRE=7d
 
 # Server
-PORT=5000
+PORT=3001
 NODE_ENV=development
 
 # Cloudinary (optional, for cloud storage)
@@ -207,13 +205,13 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
 # CORS
-CORS_ORIGIN=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 ```
 
 **Frontend (.env file):**
 ```bash
-REACT_APP_API_URL=http://localhost:5000/api
-REACT_APP_SOCKET_URL=http://localhost:5000
+VITE_API_URL=http://localhost:3001/api
+VITE_SOCKET_URL=http://localhost:3001
 ```
 
 #### 4. Database Setup
@@ -221,30 +219,38 @@ REACT_APP_SOCKET_URL=http://localhost:5000
 **Initialize Prisma:**
 ```bash
 cd backend
-npx prisma migrate dev --name init
-npx prisma db seed  # (optional, if seed script exists)
+npx prisma generate
+npx prisma db push
+npm run db:seed  # optional sample data
 ```
 
 #### 5. Run the Application
 
-**Backend (Terminal 1):**
+**Option A: One-click launcher (Windows)**
+```bash
+# From project root — double-click or run:
+start.bat
+```
+
+**Option B: Manual — Backend (Terminal 1):**
 ```bash
 cd backend
-npm start
-# Server running on http://localhost:5000
+npm run dev
+# Server running on http://localhost:3001
 ```
 
 **Frontend (Terminal 2):**
 ```bash
 cd frontend
-npm start
-# App running on http://localhost:3000
+npm run dev
+# App running on http://localhost:5173
 ```
 
 #### 6. Access the Application
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:5000/api
-- **Socket.io:** ws://localhost:5000
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:3001/api
+- **Socket.io:** ws://localhost:3001
+- **Database UI:** `npx prisma studio` (http://localhost:5555)
 
 ---
 
@@ -322,16 +328,13 @@ hospital-management-system/
 │   └── README.md
 │
 ├── docs/
-│   ├── API_DOCUMENTATION.md               # API endpoints
-│   ├── ARCHITECTURE.md                    # System design
-│   ├── SETUP.md                           # Installation guide
-│   ├── TESTING.md                         # Test procedures
-│   ├── DATABASE_SCHEMA.md                 # ER diagram
-│   └── DEPLOYMENT.md                      # Production deployment
+│   ├── API.md                            # API endpoints
+│   └── ARCHITECTURE.md                   # System design
 │
+├── render.yaml                           # Render.com deploy config
+├── .env.example
 ├── .gitignore
-├── README.md (this file)
-└── CONTRIBUTING.md
+└── README.md (this file)
 ```
 
 ---
@@ -747,7 +750,7 @@ docker run -p 5000:5000 \
 ```
 
 #### Using Traditional Server
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed instructions.
+See [render.yaml](render.yaml) and the RENDER-DEPLOYMENT notes in the repository for hosting on Render.com.
 
 ### Environment Variables
 - Set all `.env` variables before deployment
@@ -759,7 +762,7 @@ See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed instructions.
 
 ## 📝 Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please open an issue or pull request on the repository.
 
 ### Development Workflow
 1. Fork the repository
@@ -790,12 +793,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 ## 📚 Documentation
 
-- [API Documentation](docs/API_DOCUMENTATION.md) - Complete endpoint reference
+- [API Documentation](docs/API.md) - Complete endpoint reference
 - [Architecture Guide](docs/ARCHITECTURE.md) - System design and components
-- [Setup Guide](docs/SETUP.md) - Installation and configuration
-- [Testing Guide](docs/TESTING.md) - Test procedures and coverage
-- [Database Schema](docs/DATABASE_SCHEMA.md) - ER diagrams and relationships
-- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment
 
 ---
 
