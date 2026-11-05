@@ -28,8 +28,8 @@ services:
       - key: FRONTEND_URL
         fromService:
           name: hms-frontend
-          type: static
-          property: url
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
       # Optional: Add CLOUDINARY_URL here if using actual report uploads
 
   # ─── FRONTEND ──────────────────────────────────────────────
@@ -44,12 +44,12 @@ services:
         fromService:
           name: hms-api
           type: web
-          property: url
+          envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_SOCKET_URL
         fromService:
           name: hms-api
           type: web
-          property: url
+          envVarKey: RENDER_EXTERNAL_URL
     routes:
       - type: rewrite
         source: /*
