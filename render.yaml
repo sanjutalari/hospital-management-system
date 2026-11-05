@@ -33,7 +33,7 @@ services:
       # Optional: Add CLOUDINARY_URL here if using actual report uploads
 
   # ─── FRONTEND ──────────────────────────────────────────────
-  - type: static
+  - type: web
     name: hms-frontend
     runtime: static
     rootDir: frontend
