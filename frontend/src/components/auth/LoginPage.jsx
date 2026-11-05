@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom';
 export const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState('patient');
-  const [email, setEmail] = useState('patient@hms.com');
-  const [password, setPassword] = useState('patient123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -51,27 +50,6 @@ export const LoginPage = () => {
           <h2 className="text-2xl font-semibold mb-1">Welcome back</h2>
           <p className="text-slate-500 text-sm mb-8">Sign in to your HMS account</p>
 
-          {/* Role Tabs */}
-          <div className="grid grid-cols-2 gap-2 mb-7">
-            {['patient', 'doctor'].map(r => (
-              <button
-                key={r}
-                onClick={() => {
-                  setRole(r);
-                  setEmail(r === 'patient' ? 'patient@hms.com' : 'doctor@hms.com');
-                  setPassword(r === 'patient' ? 'patient123' : 'doctor123');
-                }}
-                className={`py-2.5 rounded-xl border-[1.5px] text-sm font-medium transition-all ${
-                  role === r
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                }`}
-              >
-                {r === 'patient' ? '🧑‍⚕️ Patient' : '👨‍⚕️ Doctor'}
-              </button>
-            ))}
-          </div>
-
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               {error}
@@ -82,6 +60,8 @@ export const LoginPage = () => {
             <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Email</label>
             <input
               type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border-[1.5px] border-slate-200 text-sm outline-none focus:border-blue-500 transition-colors"
@@ -91,6 +71,8 @@ export const LoginPage = () => {
             <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Password</label>
             <input
               type="password"
+              autoComplete="current-password"
+              placeholder="Enter your password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
@@ -100,7 +82,7 @@ export const LoginPage = () => {
 
           <button
             onClick={handleLogin}
-            disabled={loading}
+            disabled={loading || !email.trim() || !password}
             className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {loading ? 'Signing in…' : 'Sign in'}
