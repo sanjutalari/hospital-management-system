@@ -12,7 +12,7 @@ services:
     region: singapore
     rootDir: backend
     buildCommand: npm ci && npx prisma generate --schema prisma/schema.postgres.prisma
-    startCommand: npx prisma db push --schema prisma/schema.postgres.prisma && npm start
+    startCommand: npx prisma db push --schema prisma/schema.postgres.prisma && npm run db:seed:demo-doctor && npm start
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL

@@ -13,6 +13,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
+    "db:seed:demo-doctor": "node prisma/seed-demo-doctor.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
