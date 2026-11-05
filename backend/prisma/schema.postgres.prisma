@@ -1,0 +1,189 @@
+// ============================================================
+// HMS — Prisma Schema (PostgreSQL for Render)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// USERS — base auth table for all roles
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   // "PATIENT", "DOCTOR", "ADMIN"
+  name         String
+  isActive     Boolean  @default(true) @map("is_active")
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  patient       Patient?
+  doctor        Doctor?
+  sentMessages  ChatMessage[] @relation("SentMessages")
+  recvMessages  ChatMessage[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// PATIENTS
+// ─────────────────────────────────────────────
+
+model Patient {
+  id               String    @id @default(uuid())
+  userId           String    @unique @map("user_id")
+  patientCode      String    @unique @map("patient_code") // e.g. PAT-001
+  age              Int?
+  weightKg         Float?    @map("weight_kg")
+  heightCm         Float?    @map("height_cm")
+  bloodType        String?   @map("blood_type")
+  phone            String?
+  address          String?
+  medicalHistory   String?   @map("medical_history")
+  emergencyContact String?   @map("emergency_contact")
+  emergencyPhone   String?   @map("emergency_phone")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  records      MedicalRecord[]
+  reports      Report[]
+
+  @@map("patients")
+}
+
+// ─────────────────────────────────────────────
+// DOCTORS
+// ─────────────────────────────────────────────
+
+model Doctor {
+  id            String   @id @default(uuid())
+  userId        String   @unique @map("user_id")
+  doctorCode    String   @unique @map("doctor_code") // e.g. DOC-001
+  specialty     String
+  licenseNumber String   @unique @map("license_number")
+  department    String?
+  phone         String?
+  bio           String?
+  available     Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  records      MedicalRecord[]
+  reports      Report[]
+
+  @@map("doctors")
+}
+
+// ─────────────────────────────────────────────
+// APPOINTMENTS
+// ─────────────────────────────────────────────
+
+model Appointment {
+  id          String            @id @default(uuid())
+  patientId   String            @map("patient_id")
+  doctorId    String            @map("doctor_id")
+  scheduledAt DateTime          @map("scheduled_at")
+  status      String            @default("PENDING") // PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED
+  reason      String?
+  notes       String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor  Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  record  MedicalRecord?
+
+  @@map("appointments")
+}
+
+// ─────────────────────────────────────────────
+// MEDICAL RECORDS
+// ─────────────────────────────────────────────
+
+model MedicalRecord {
+  id            String   @id @default(uuid())
+  patientId     String   @map("patient_id")
+  doctorId      String   @map("doctor_id")
+  appointmentId String?  @unique @map("appointment_id")
+  diagnosis     String?
+  symptoms      String?
+  advice        String?
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  prescriptions Prescription[]
+
+  @@map("medical_records")
+}
+
+// ─────────────────────────────────────────────
+// PRESCRIPTIONS
+// ─────────────────────────────────────────────
+
+model Prescription {
+  id           String @id @default(uuid())
+  recordId     String @map("record_id")
+  medicineName String @map("medicine_name")
+  dosage       String // e.g. "500mg"
+  frequency    String // e.g. "Twice daily"
+  durationDays Int    @map("duration_days")
+  instructions String?
+
+  record MedicalRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@map("prescriptions")
+}
+
+// ─────────────────────────────────────────────
+// REPORTS (PDFs / Images)
+// ─────────────────────────────────────────────
+
+model Report {
+  id           String     @id @default(uuid())
+  patientId    String     @map("patient_id")
+  doctorId     String?    @map("doctor_id")
+  title        String
+  fileUrl      String     @map("file_url")       
+  cloudinaryId String     @map("cloudinary_id")  
+  reportType   String     @default("OTHER") @map("report_type")
+  uploadedAt   DateTime   @default(now()) @map("uploaded_at")
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor  Doctor? @relation(fields: [doctorId], references: [id])
+
+  @@map("reports")
+}
+
+// ─────────────────────────────────────────────
+// CHAT MESSAGES
+// ─────────────────────────────────────────────
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String   @map("sender_id")
+  receiverId String   @map("receiver_id")
+  content    String
+  isRead     Boolean  @default(false) @map("is_read")
+  sentAt     DateTime @default(now()) @map("sent_at")
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@map("chat_messages")
+}
